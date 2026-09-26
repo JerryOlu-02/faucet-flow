@@ -8,7 +8,7 @@ import { FlowMeter } from "@/components/FlowMeter";
 import { Toast, ToastShelf, ToastStatus } from "@/components/ToastShelf";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-import { formatDuration, getTimeLeft } from "@/lib/format";
+import { formatDuration } from "@/lib/format";
 import { sample } from "@/lib/sampleData";
 import { faucetAddress, tokenAddress } from "@/lib/contracts";
 import { faucetAbi, tokenAbi } from "@/lib/abi";
@@ -16,7 +16,6 @@ import { faucetAbi, tokenAbi } from "@/lib/abi";
 import {
   useAccount,
   useAccountEffect,
-  useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -53,7 +52,8 @@ export default function HomePage() {
   );
 
   // Can claim if the wallet is connected and the seconds remaining is 0
-  const canClaim = isConnected && Number(secondsRemaining) === 0;
+  const canClaim =
+    isConnected && secondsRemaining !== undefined && countdown === 0;
 
   function showToast(status: ToastStatus, message: string) {
     setToast({ status, message });
@@ -137,7 +137,7 @@ export default function HomePage() {
   // Wait label for the countdown
   const waitLabel =
     countdown > 0
-      ? `Next claim opens in ${getTimeLeft(countdown)}`
+      ? `Next claim opens in ${formatDuration(countdown)}`
       : "This wallet can claim now";
 
   return (

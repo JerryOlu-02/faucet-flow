@@ -19,11 +19,16 @@ export function FlowMeter({
   const center = size / 2;
   const radius = 108;
   const circumference = 2 * Math.PI * radius;
-  const elapsed =
+
+  const remaining =
     cooldownSeconds <= 0
-      ? 1
-      : 1 - Math.min(secondsRemaining, cooldownSeconds) / cooldownSeconds;
-  const drawn = Math.max(0, Math.min(1, elapsed)) * circumference;
+      ? 0
+      : Math.min(Math.max(secondsRemaining, 0), cooldownSeconds);
+
+  const elapsed =
+    cooldownSeconds <= 0 ? 1 : (cooldownSeconds - remaining) / cooldownSeconds;
+
+  const drawn = elapsed * circumference;
 
   const ticks = Array.from({ length: 24 }, (_, hour) => {
     const angle = (hour / 24) * Math.PI * 2 - Math.PI / 2;

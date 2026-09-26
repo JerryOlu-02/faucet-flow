@@ -47,7 +47,7 @@ export const useContract = () => {
     query: { enabled: !!address },
   });
 
-  // Read the seconds remaining until the next claim
+  // Unix timestamp when this wallet can claim again. 0 if they never have.
   const { data: secondsRemaining, refetch: refetchNextClaimAt } =
     useReadContract({
       address: faucetAddress as `0x${string}`,
@@ -57,20 +57,19 @@ export const useContract = () => {
       query: { enabled: !!address },
     });
 
-  const [countdown, setCountdown] = useState<number>(
-    secondsRemaining ? Number(secondsRemaining) : 0,
-  );
+  const [countdown, setCountdown] = useState(0);
 
   useEffect(() => {
-    // Set the countdown to the seconds remaining
-    const unlockAt = Date.now() + Number(secondsRemaining) * 1000;
+    // nextClaimAt is a unix timestamp in seconds. 0 means this wallet has never claimed.
+    const unlockAt = Number(secondsRemaining ?? 0);
 
     const tick = () => {
-      setCountdown(Math.max(0, Math.ceil((unlockAt - Date.now()) / 1000)));
+      const now = Math.floor(Date.now() / 1000);
+      setCountdown(unlockAt > now ? unlockAt - now : 0);
     };
 
+    tick();
     const id = window.setInterval(tick, 1000);
-
     return () => window.clearInterval(id);
   }, [secondsRemaining]);
 
